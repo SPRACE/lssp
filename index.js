@@ -1,29 +1,21 @@
-/*
-   npm install express
-   npm install lokijs
-   npm install ldapjs
-   npm install uuid
-   npm install sendmail
-   npm install body-parser
-*/
-
+// Requires
 var express = require('express');
+var loki = require('lokijs');
+var ldapjs = require('ldapjs');
+var uuid = require('uuid');
+var sendmail = require('sendmail')();
+var bodyParser = require('body-parser')
+
 var app = express();
 app.use(express.static(__dirname+'/static'));
 
-var loki = require('lokijs');
 var db = new loki('lssp.json')
 var tokens = db.addCollection('tokens')
 
-var ldapjs = require('ldapjs');
 var ldap = ldapjs.createClient({
   url: 'ldap://ldap.ncc.unesp.br/'
 });
 
-var uuid = require('uuid');
-var sendmail = require('sendmail')();
-
-var bodyParser = require('body-parser')
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 

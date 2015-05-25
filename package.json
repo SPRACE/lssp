@@ -1,0 +1,13 @@
+{
+  "name": "lssp",
+  "description": "LDAP Self Service Password",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "3.x",
+    "lokijs": "*",
+    "ldapjs": "*",
+    "uuid": "*",
+    "sendmail": "*",
+    "body-parser": "*"
+  }
+}
