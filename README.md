@@ -16,11 +16,11 @@ automatically restart your server. Perfect for development. Install it using
 npm.
 
 ```bash
-# npm install -g nodemon
+$ sudo npm install -g nodemon
 ```
 
 Just use nodemon instead of node to run your code:
 
 ```bash
-# nodemon index.js
+$ nodemon index.js
 ```
