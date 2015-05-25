@@ -2,6 +2,17 @@
   "name": "lssp",
   "description": "LDAP Self Service Password",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SPRACE/lssp"
+  },
+  "keywords": [
+    "ldap",
+    "password",
+    "web",
+    "interface",
+    "ssp"
+  ],
   "dependencies": {
     "express": "3.x",
     "lokijs": "*",
@@ -9,5 +20,6 @@
     "uuid": "*",
     "sendmail": "*",
     "body-parser": "*"
-  }
+  },
+  "license": "GPLv2"
 }
