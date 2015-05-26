@@ -1,0 +1,20 @@
+{
+  "ldap": {
+    "url": "ldap://your.ldap.server/",
+    "base": "dc=your,dc=ldap,dc=dc" 
+  },
+  "ssh": {
+    "host": "your.ldap.server",
+    "port": 22,
+    "user": "root",
+    "key": "/path/for/your/local/private/key",
+    "command": "/usr/local/sbin/change-ldap-password"
+  },
+  "email": {
+    "from": "no-reply@your.domain.com",
+    "admin": "admin@your.domain.com"
+  },
+  "url": {
+    "base": "http://your.domain.com"
+  }
+}
