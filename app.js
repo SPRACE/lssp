@@ -123,9 +123,9 @@ app.post('/api/reset', function (req, res) {
 
       // Send email to user
       var body  = "An user has requested a password change for your account.\n"
-          body += "If you dont recnogize this request, please ignore this email.\n"
+          body += "If you dont recognize this request, please ignore this email.\n"
           body += "Otherwise follow the link to confirm and choose a new password:\n\n"
-          body += config.get('url.base') + "/password/confirm.html?token=" + user.token
+          body += config.get('url.base') + "/confirm.html?token=" + user.token
           body += "\n\nThis link is valid only for 3 hours.\n"
           body += "--\n"
           body += "NCC Team\n"

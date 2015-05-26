@@ -33,7 +33,7 @@ function do_reset() {
         type: "POST",
         contentType: "application/json", //mandatory
         data: JSON.stringify(request_data),
-        url: "http://127.0.0.1:3000/api/reset/",
+        url: "api/reset/",
         error: function(xhr, ajaxOptions, thrownError) {
             msg = xhr.status + ":" + xhr.statusText + ' ';
             if (xhr.responseJSON) {
@@ -81,7 +81,7 @@ function do_confirm() {
         type: "POST",
         contentType: "application/json", //mandatory
         data: JSON.stringify(request_data),
-        url: "http://127.0.0.1:3000/api/confirm/",
+        url: "api/confirm/",
         error: function(xhr, ajaxOptions, thrownError) {
             msg = xhr.status + ":" + xhr.statusText + ' ';
             if (xhr.responseJSON) {
