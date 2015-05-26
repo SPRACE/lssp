@@ -52,7 +52,6 @@ function search_user(userid, callback) {
       if (count > 1) {
         ret = { dn: '', email: '' };
       }
-      console.log(ret);
       callback(ret);
     });
   });
@@ -63,7 +62,6 @@ function update_password(dn, password, callback) {
   var conn = new ssh2.Client();
   var args = dn + " " + password;
   var exec = config.get('ssh.command') + " " + args;
-  console.log(exec);
   conn.on('ready', function() {
     console.log('SSH Client ready');
     conn.exec(exec, function(err, stream) {
@@ -104,9 +102,6 @@ function send_email(body, subject, from, to, callback) {
 app.post('/api/reset', function (req, res) {
   var userid = req.body.userid;
 
-  console.log("Reset");
-  console.log(userid);
-
   // TODO: check if IP not abusing
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
@@ -145,8 +140,6 @@ app.post('/api/reset', function (req, res) {
 
         res.type('json');
         res.send(JSON.stringify(ret));
-
-        console.log(user.token)
       });
     } else {
       // no user (or more than one)
@@ -166,8 +159,6 @@ app.post('/api/confirm', function (req, res) {
 
   // check token
   var user = tokens.findOne({token: token});
-  console.log(user);
-
   var exp_time = 3 * 60 * 60 * 1000; // 3 hours
 
   // check if token exist and is valid
@@ -178,6 +169,9 @@ app.post('/api/confirm', function (req, res) {
       if (code == 0) {
         ret = { success: true,
                 message: 'Your password was changed.' };
+
+        // remove token
+        tokens.remove(user);
 
         // send email
         var body  = "Your password has been updated!\n"
