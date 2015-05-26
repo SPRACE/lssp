@@ -22,5 +22,5 @@ $ sudo npm install -g nodemon
 Just use nodemon instead of node to run your code:
 
 ```bash
-$ nodemon index.js
+$ nodemon app.js
 ```
