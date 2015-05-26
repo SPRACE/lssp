@@ -1,0 +1,6 @@
+{
+  "ldap": {
+    "url": "ldap://ldap.ncc.unesp.br/",
+    "base": "dc=ncc,dc=unesp,dc=br" 
+  }
+}

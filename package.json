@@ -19,7 +19,8 @@
     "ldapjs": "*",
     "uuid": "*",
     "sendmail": "*",
-    "body-parser": "*"
+    "body-parser": "*",
+    "config": "*"
   },
   "license": "GPLv2"
 }

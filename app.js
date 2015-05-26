@@ -4,7 +4,8 @@ var loki = require('lokijs');
 var ldapjs = require('ldapjs');
 var uuid = require('uuid');
 var sendmail = require('sendmail')();
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
+var config = require('config');
 
 var app = express();
 app.use(express.static(__dirname+'/static'));
@@ -13,7 +14,7 @@ var db = new loki('lssp.json')
 var tokens = db.addCollection('tokens')
 
 var ldap = ldapjs.createClient({
-  url: 'ldap://ldap.ncc.unesp.br/'
+  url: config.get('ldap.url')
 });
 
 app.use(bodyParser.json()); // for parsing application/json
@@ -28,7 +29,7 @@ function search_user(userid, callback) {
     scope: 'sub'
   };
 
-  ldap.search('dc=ncc,dc=unesp,dc=br', opts, function(err, res) {
+  ldap.search(config.get('ldap.base'), opts, function(err, res) {
     var count = 0;
 
     //assert.ifError(err);
