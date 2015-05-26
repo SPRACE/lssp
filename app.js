@@ -92,8 +92,8 @@ function send_email(body, subject, from, to, callback) {
     subject: subject,
     content: body,
     }, function(err, reply) {
-      console.log(err && err.stack);
-      console.dir(reply);
+      //console.log(err && err.stack);
+      //console.dir(reply);
   });
 
   if (callback) callback();
