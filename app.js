@@ -28,7 +28,7 @@ function search_user(userid, callback) {
   ret = { 'dn': '', 'email': '' };
 
   var opts = {
-    filter: '(|(uid~='+userid+')(email='+userid+'))',
+    filter: '(|(uid='+userid+')(mail='+userid+'))',
     attributes: ['dn', 'mail'],
     scope: 'sub'
   };
@@ -98,7 +98,7 @@ function send_email(body, subject, from, to, callback) {
       console.dir(reply);
   });
 
-  callback();
+  if (callback) callback();
 }
 
 app.post('/api/reset', function (req, res) {
@@ -121,7 +121,7 @@ app.post('/api/reset', function (req, res) {
                       email:user.email, timestamp: new Date(), ip:ip });
 
       // Send email to admins
-      var body = "Password reset requested to user " + userid
+      var body = "Password reset requested for user " + userid
       var subject = "[lssp] Password reset was requested"
 
       send_email(body, subject, config.get('email.from'), config.get('email.admin'));
