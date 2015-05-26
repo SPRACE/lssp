@@ -120,7 +120,13 @@ app.post('/api/reset', function (req, res) {
       tokens.insert({ token: user.token, dn: user.dn,
                       email:user.email, timestamp: new Date(), ip:ip });
 
-      // send email
+      // Send email to admins
+      var body = "Password reset requested to user " + userid
+      var subject = "[lssp] Password reset was requested"
+
+      send_email(body, subject, config.get('email.from'), config.get('email.admin'));
+
+      // Send email to user
       var body  = "An user has requested a password change for your account.\n"
           body += "If you dont recnogize this request, please ignore this email.\n"
           body += "Otherwise follow the link to confirm and choose a new password:\n\n"
