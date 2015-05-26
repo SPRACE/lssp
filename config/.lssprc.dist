@@ -1,0 +1,3 @@
+LDAP_PASS_FILE="PUT_HERE_YOUR_LDAP_PASS_FILE"
+LDAP_ADMIN_DN="cn=admin,dc=your,dc=ldap,dc=dc"
+EMAIL_ADMIN="admin@your.domain.com"
