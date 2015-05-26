@@ -2,5 +2,19 @@
   "ldap": {
     "url": "ldap://ldap.ncc.unesp.br/",
     "base": "dc=ncc,dc=unesp,dc=br" 
+  },
+  "ssh": {
+    "host": "ldap.ncc.unesp.br",
+    "port": 22,
+    "user": "root",
+    "key": "/home/beraldo/.ssh/ldap_change_password_rsa",
+    "command": "/usr/local/sbin/change-ldap-password"
+  },
+  "email": {
+    "from": "no-reply@ncc.unesp.br",
+    "admin": "ncc_admin@ncc.unesp.br"
+  },
+  "url": {
+    "base": "http://127.0.0.1"
   }
 }

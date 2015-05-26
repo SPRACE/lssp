@@ -6,6 +6,8 @@ var uuid = require('uuid');
 var sendmail = require('sendmail')();
 var bodyParser = require('body-parser');
 var config = require('config');
+var ssh2 = require('ssh2');
+var fs = require('fs');
 
 var app = express();
 app.use(express.static(__dirname+'/static'));
@@ -17,8 +19,10 @@ var ldap = ldapjs.createClient({
   url: config.get('ldap.url')
 });
 
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+// for parsing application/json
+app.use(bodyParser.json());
+// for parsing application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
 
 function search_user(userid, callback) {
   ret = { 'dn': '', 'email': '' };
@@ -55,36 +59,56 @@ function search_user(userid, callback) {
 }
 
 function update_password(dn, password, callback) {
-  var admin_dn = '';
-  var admin_password = '';
-  ldap.bind(admin_dn, admin_password, function (err) {
-    //assert.ifError(err);
-    console.log(err);
+
+  var conn = new ssh2.Client();
+  var args = dn + " " + password;
+  var exec = config.get('ssh.command') + " " + args;
+  console.log(exec);
+  conn.on('ready', function() {
+    console.log('SSH Client ready');
+    conn.exec(exec, function(err, stream) {
+      if (err) throw err;
+      stream.on('close', function(code, signal) {
+        console.log('SSH closed. Code: ' + code + ', Signal: ' + signal);
+        conn.end();
+        callback(code);
+      }).on('data', function(data) {
+        console.log('STDOUT: ' + data);
+      }).stderr.on('data', function(data) {
+        console.log('STDERR: ' + data);
+      });
+    });
+  }).connect({
+    host: config.get('ssh.host'),
+    port: config.get('ssh.port'),
+    username: config.get('ssh.user'),
+    privateKey: fs.readFileSync(config.get('ssh.key'))
   });
 
-  // TODO: Salted SHA
-  password_ssha = password+'salt';
+}
 
-  var change = new ldap.Change({
-    operation: 'replace',
-    modification: {
-      userPassword: [ password_ssha ]
-    }
+function send_email(body, subject, from, to, callback) {
+  sendmail({
+    from: from,
+    to: to,
+    subject: subject,
+    content: body,
+    }, function(err, reply) {
+      console.log(err && err.stack);
+      console.dir(reply);
   });
 
-  client.modify(dn, change, function(err) {
-    //assert.ifError(err);
-    callback();
-  });
+  callback();
 }
 
 app.post('/api/reset', function (req, res) {
   var userid = req.body.userid;
 
+  console.log("Reset");
+  console.log(userid);
+
   // TODO: check if IP not abusing
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-  //tokens.find( {'ip':ip } )
 
   // search LDAP for username / email
   var user = search_user(userid, function(user) {
@@ -94,31 +118,36 @@ app.post('/api/reset', function (req, res) {
 
       // save
       tokens.insert({ token: user.token, dn: user.dn,
-                      email:user.email, timestamp:new Date(), ip:ip });
+                      email:user.email, timestamp: new Date(), ip:ip });
 
       // send email
-      /*
-      sendmail({
-        from: 'no-reply@ncc.unesp.br',
-        to: 'bla@ncc.unesp.br',
-        subject: '[NCC/UNESP] Change password request',
-        content: 'bla, bla, bla\n' + user.token + '\nbla\n',
-        }, function(err, reply) {
-          console.log(err && err.stack);
-          console.dir(reply);
+      var body  = "An user has requested a password change for your account.\n"
+          body += "If you dont recnogize this request, please ignore this email.\n"
+          body += "Otherwise follow the link to confirm and choose a new password:\n\n"
+          body += config.get('url.base') + "/password/confirm.html?token=" + user.token
+          body += "\n\nThis link is valid only for 3 hours.\n"
+          body += "--\n"
+          body += "NCC Team\n"
+          body += "support@ncc.unesp.br"
+
+      var subject = "Password reset request for your account";
+
+      send_email(body, subject, config.get('email.from'), user.email, function() {
+        ret = { success: true,
+                message: "Confirmation link was sent to your email.",
+                email: user.email.replace(/^.+@/i, 'xxxx@')};
+
+        res.type('json');
+        res.send(JSON.stringify(ret));
+
+        console.log(user.token)
       });
-      */
-      ret = { success: true, message: 'email sent to :' + user.email };
-      res.type('json');
-      res.send(JSON.stringify(ret));
-
-      console.log(user.token)
-
     } else {
       // no user (or more than one)
       res.status(404);
       res.type('json');
-      ret = { success: false, message: 'invalid user' };
+      ret = { success: false,
+              message: 'Invalid user or email.' };
       res.send(JSON.stringify(ret));
     }
 
@@ -131,40 +160,46 @@ app.post('/api/confirm', function (req, res) {
 
   // check token
   var user = tokens.findOne({token: token});
+  console.log(user);
 
   var exp_time = 3 * 60 * 60 * 1000; // 3 hours
 
   // check if token exist and is valid
-  if ((user) && ((Date() - user.timestamp) < exp_time)) {
+  if ((user) && ((new Date() - user.timestamp) < exp_time)) {
     // set new passwod
-    change_password(user.dn, password, function(){
+    update_password(user.dn, password, function(code){
 
-      // send mail
-      /*
-      sendmail({
-        from: 'no-reply@ncc.unesp.br',
-        to: 'bla@ncc.unesp.br',
-        subject: '[NCC/UNESP] Change password request',
-        content: 'bla, bla, bla\n' + user.token + '\nbla\n',
-        }, function(err, reply) {
-          console.log(err && err.stack);
-          console.dir(reply);
-      });
-      */
+      if (code == 0) {
+        ret = { success: true,
+                message: 'Your password was changed.' };
 
-      ret = { success: true, message: 'password changed' };
-      res.type('json');
-      res.send(JSON.stringify(ret));
+        // send email
+        var body  = "Your password has been updated!\n"
+        var body  = "Please use the new password for further logins.\n"
+            body += "--\n"
+            body += "NCC Team\n"
+            body += "support@ncc.unesp.br"
+        var subject = "Your password has been updated.";
+        send_email(body, subject, config.get('email.from'), user.email, function() {
+          res.type('json');
+          res.send(JSON.stringify(ret));
+        });
+      } else {
+        res.status(404);
+        res.type('json');
+        ret = { success: false,
+                message: 'Failed to change your password.' };
+        res.send(JSON.stringify(ret));
+      }
     })
   } else {
     // no user (or more than one)
     res.status(404);
     res.type('json');
-    ret = { success: false, message: 'invalid token' };
+    ret = { success: false,
+            message: 'Token invalid or expired.' };
     res.send(JSON.stringify(ret));
   }
-
-
 });
 
 app.listen(3000)

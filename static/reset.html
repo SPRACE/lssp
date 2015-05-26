@@ -48,20 +48,18 @@
                     <h1 class="section-heading">Reset your password <small>If you have lost it.</small></h1>
                     <p class="lead section-lead">Please, inform your NCC/Sprace username or email and we will send a reset link to your email.</p>
 
-                    <form class="form-inline">
-                      <div class="form-group form-group-lg">
+                    <div class="form-inline">
+                      <div class="form-group form-group-lg" id="reset_box">
                         <label class="sr-only" for="userid">Your username or email</label>
                         <input type="text" class="form-control" id="userid" placeholder="Your username or email">
                       </div>
-                      <button type="submit" class="btn btn-primary btn-lg">Reset my password</button>
-                    </form>
+                      <button type="submit" onclick="do_reset();" class="btn btn-primary btn-lg">Reset my password</button>
+                    </div>
 
-                    <!-- Success Callout (enable only when success)-->
-                    <div class="bs-callout bs-callout-info">
-                        <h4>Now, please check your email.</h4>
-                        <p>In order to ensure your security, we just send a
-                           link to your email <strong>*****@ncc.unesp.br</strong>. Please check your inbox
-                           and follow the instructions. If you have any questions, please contact
+                    <!-- Callout box -->
+                    <div class="bs-callout" id="callout">
+                        <h4 id="title"></h4>
+                        <p><div id="message"></div>If you have any questions, please contact
                            <a href="mailto:support@ncc.unesp.br">support@ncc.unesp.br</a></p>
                     </div>
 
@@ -84,18 +82,10 @@
         <!-- /.container -->
     </footer>
 
-    <!-- Bootstrap Core JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
-    <script>
-      var link = document.querySelector('link[rel="import"]');
-
-      // Clone the <template> in the import.
-      var template = link.import.querySelector('template');
-      var clone = document.importNode(template.content, true);
-
-      document.querySelector('#reset').appendChild(clone);
-  </script>
+    <script src="assets/js/lssp.js"></script>
 
 </body>
 

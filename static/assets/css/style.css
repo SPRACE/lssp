@@ -43,8 +43,8 @@ section {
     -moz-border-left-colors: none;
     border-image: none;
     border-radius: 3px;
+    display: none;
 }
-
 
 footer {
     margin: 50px 0;

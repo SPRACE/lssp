@@ -20,7 +20,9 @@
     "uuid": "*",
     "sendmail": "*",
     "body-parser": "*",
-    "config": "*"
+    "config": "*",
+    "ssh2": "*",
+    "fs": "*"
   },
   "license": "GPLv2"
 }
