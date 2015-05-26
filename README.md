@@ -9,6 +9,14 @@ ability to change your password in ldap.
 $ npm install .
 ```
 
+## Configure
+
+Copy the original config file and make the propper changes:
+
+```bash
+$ cp config/default.json.dist config/default.json
+```
+
 ## Hacking
 
 Nodemon is a utility that will monitor for any changes in your source and
