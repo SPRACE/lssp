@@ -3,7 +3,7 @@ var express = require('express');
 var loki = require('lokijs');
 var LDAP = require('LDAP');
 var uuid = require('uuid');
-var sendmail = require('sendmail')();
+var sendmail = require('email');
 var bodyParser = require('body-parser');
 var config = require('config');
 var ssh2 = require('ssh2');
@@ -85,17 +85,21 @@ function update_password(dn, password, callback) {
 }
 
 function send_email(body, subject, from, to, callback) {
-  sendmail({
+
+  var msg = new sendmail.Email({
     from: from,
     to: to,
     subject: subject,
-    content: body,
-    }, function(err, reply) {
-      //console.log(err && err.stack);
-      //console.dir(reply);
-  });
+    body: body,
+  })
 
-  if (callback) callback();
+  msg.send(function(err) {
+    if (err) {
+      console.log("Failed to send email:" + err);
+    }
+
+    if (callback) callback();
+  });
 }
 
 app.post('/api/reset', function (req, res) {
