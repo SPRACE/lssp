@@ -1,7 +1,7 @@
 // Requires
 var express = require('express');
 var loki = require('lokijs');
-var ldapjs = require('ldapjs');
+var LDAP = require('LDAP');
 var uuid = require('uuid');
 var sendmail = require('sendmail')();
 var bodyParser = require('body-parser');
@@ -15,9 +15,7 @@ app.use(express.static(__dirname+'/static'));
 var db = new loki('lssp.json')
 var tokens = db.addCollection('tokens')
 
-var ldap = ldapjs.createClient({
-  url: config.get('ldap.url')
-});
+var ldap = new LDAP({ uri: config.get('ldap.url') });
 
 // for parsing application/json
 app.use(bodyParser.json());
@@ -25,35 +23,36 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 function search_user(userid, callback) {
-  ret = { 'dn': '', 'email': '' };
+  ldap.open(function(err) {
+    ret = { dn: '', email: '' };
+    if (err) {
+       console.log('error: can not connect LDAP server\n'+err);
+       callback(ret);
+       return;
+    }
 
-  var opts = {
-    filter: '(|(uid='+userid+')(mail='+userid+'))',
-    attributes: ['dn', 'mail'],
-    scope: 'sub'
-  };
+    var opts = {
+      base: config.get('ldap.base'),
+      filter: '(|(uid='+userid+')(mail='+userid+'))',
+      attrs: ['dn', 'mail'],
+      scope: ldap.SUBTREE
+    };
 
-  ldap.search(config.get('ldap.base'), opts, function(err, res) {
-    var count = 0;
-
-    //assert.ifError(err);
-    res.on('searchEntry', function(entry) {
-      count = count + 1;
-      ret.dn = entry.object.dn;
-      ret.email = entry.object.mail;
-    });
-  
-    res.on('error', function(err) {
-      console.error('error: ' + err.message);
-    });
-
-    res.on('end', function(result) {
-      // check for more than one result
-      if (count > 1) {
-        ret = { dn: '', email: '' };
+    ldap.search(opts, function(err, data) {
+      if (err) {
+        console.log('error: error searching on LDAP server');
+        callback(ret);
+        return;
       }
+
+      if (data.length == 1) {
+        ret = { dn: data[0].dn, email: data[0].mail[0] };
+      }
+
+      ldap.close();
       callback(ret);
     });
+
   });
 }
 

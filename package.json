@@ -16,7 +16,7 @@
   "dependencies": {
     "express": "3.x",
     "lokijs": "*",
-    "ldapjs": "*",
+    "LDAP": "*",
     "uuid": "*",
     "sendmail": "*",
     "body-parser": "*",
